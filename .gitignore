@@ -1,0 +1,10 @@
+node_modules/
+.env
+playwright-report/
+test-results/
+dist/
+*.log
+allure-results/
+allure-report/
+passportnotary.pdf
+*.xlsx

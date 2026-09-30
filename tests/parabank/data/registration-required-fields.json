@@ -1,0 +1,12 @@
+[
+  "firstName",
+  "lastName",
+  "street",
+  "city",
+  "state",
+  "zipCode",
+  "phoneNumber",
+  "ssn",
+  "username",
+  "password"
+]

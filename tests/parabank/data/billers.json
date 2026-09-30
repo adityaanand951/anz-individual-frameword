@@ -1,0 +1,12 @@
+[
+  { "name": "Sydney Energy", "street": "10 George Street", "city": "Sydney", "state": "NSW", "zipCode": "2000", "phoneNumber": "0291110001", "account": "10000001" },
+  { "name": "Melbourne Water", "street": "22 Collins Street", "city": "Melbourne", "state": "VIC", "zipCode": "3000", "phoneNumber": "0391110002", "account": "10000002" },
+  { "name": "Brisbane Gas", "street": "35 Queen Street", "city": "Brisbane", "state": "QLD", "zipCode": "4000", "phoneNumber": "0791110003", "account": "10000003" },
+  { "name": "Perth Internet", "street": "41 Hay Street", "city": "Perth", "state": "WA", "zipCode": "6000", "phoneNumber": "0891110004", "account": "10000004" },
+  { "name": "Adelaide Council", "street": "8 King William Road", "city": "Adelaide", "state": "SA", "zipCode": "5000", "phoneNumber": "0891110005", "account": "10000005" },
+  { "name": "Hobart Insurance", "street": "19 Murray Street", "city": "Hobart", "state": "TAS", "zipCode": "7000", "phoneNumber": "0391110006", "account": "10000006" },
+  { "name": "Darwin Telecom", "street": "5 Mitchell Street", "city": "Darwin", "state": "NT", "zipCode": "0800", "phoneNumber": "0891110007", "account": "10000007" },
+  { "name": "Canberra Rates", "street": "12 London Circuit", "city": "Canberra", "state": "ACT", "zipCode": "2600", "phoneNumber": "0291110008", "account": "10000008" },
+  { "name": "National Health", "street": "55 Pitt Street", "city": "Sydney", "state": "NSW", "zipCode": "2000", "phoneNumber": "0291110009", "account": "10000009" },
+  { "name": "Regional Water", "street": "77 Bourke Street", "city": "Melbourne", "state": "VIC", "zipCode": "3000", "phoneNumber": "0391110010", "account": "10000010" }
+]

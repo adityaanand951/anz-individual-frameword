@@ -1,0 +1,13 @@
+{
+  "cucumber.features": [
+    "features/**/*.feature"
+  ],
+  "cucumber.glue": [
+    "tests/bdd/**/*.ts",
+    "tests/bdd/mobile/**/*.ts"
+  ],
+  "cucumber.stepDefinitions": [
+    "tests/bdd/**/*.ts",
+    "tests/bdd/mobile/**/*.ts"
+  ]
+}
