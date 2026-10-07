@@ -12,7 +12,14 @@ export class ParabankTransferPage {
     await this.page.locator('#amount').fill(amount);
     await this.page.locator('#fromAccountId').selectOption(fromAccountId);
     await this.page.locator('#toAccountId').selectOption(toAccountId);
-    await this.page.locator('input[value="Transfer"]').click();
+    const transferResponse = this.page.waitForResponse((response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname.includes('/services_proxy/bank/transfer')
+    );
+    await Promise.all([
+      this.page.locator('input[value="Transfer"]').click(),
+      transferResponse
+    ]);
   }
 
   async expectResult() {

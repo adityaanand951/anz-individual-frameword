@@ -67,6 +67,7 @@ Then('the ParaBank Accounts Overview should show the seeded account and balance'
 When(
   'I transfer {string} from the seeded account to another account',
   async function (this: BddWorld, amount: string) {
+    this.parabankTransferAmount = Number(amount);
     const destination = await this.parabankApi.openAccount(
       this.parabankCustomer.id,
       'CHECKING',
@@ -75,7 +76,9 @@ When(
     this.parabankDestinationAccountId = destination.id;
     const source = await this.parabankApi.getAccount(this.parabankSourceAccountId);
     this.parabankSourceBalanceBefore = source.balance;
-    this.parabankDestinationBalanceBefore = destination.balance;
+    this.parabankDestinationBalanceBefore = (
+      await this.parabankApi.getAccount(destination.id)
+    ).balance;
     await new ParabankTransferPage(this.page).transfer(
       this.parabankSourceAccountId,
       destination.id,
@@ -89,10 +92,24 @@ Then('the transfer confirmation should be displayed', async function (this: BddW
 });
 
 Then('the source and destination balances should reconcile', async function (this: BddWorld) {
-  const source = await this.parabankApi.getAccount(this.parabankSourceAccountId);
-  const destination = await this.parabankApi.getAccount(this.parabankDestinationAccountId);
-  expect(source.balance).toBeCloseTo(this.parabankSourceBalanceBefore - 5, 2);
-  expect(destination.balance).toBeCloseTo(this.parabankDestinationBalanceBefore + 5, 2);
+  const expectedSourceCents = Math.round(
+    (this.parabankSourceBalanceBefore - this.parabankTransferAmount) * 100
+  );
+  const expectedDestinationCents = Math.round(
+    (this.parabankDestinationBalanceBefore + this.parabankTransferAmount) * 100
+  );
+
+  await expect.poll(async () => {
+    const source = await this.parabankApi.getAccount(this.parabankSourceAccountId);
+    const destination = await this.parabankApi.getAccount(this.parabankDestinationAccountId);
+    return {
+      sourceCents: Math.round(source.balance * 100),
+      destinationCents: Math.round(destination.balance * 100)
+    };
+  }, { timeout: 10_000 }).toEqual({
+    sourceCents: expectedSourceCents,
+    destinationCents: expectedDestinationCents
+  });
 });
 
 When('I pay {string} to the {string} biller', async function (this: BddWorld, amount: string, payeeName: string) {

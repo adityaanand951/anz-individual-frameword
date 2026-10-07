@@ -25,8 +25,12 @@ export async function positiveAccounts(api: ParabankApi, customerId: string, min
   }
   while (accounts.filter((account) => account.balance > 0).length < minimum) {
     const created = await api.openAccount(customerId, 'CHECKING', source.id);
-    accounts.push(created);
-    source = created.balance > 0 ? created : source;
+    if (created.balance <= 0) {
+      await api.deposit(created.id, 10);
+    }
+    const fundedAccount = await api.getAccount(created.id);
+    accounts.push(fundedAccount);
+    source = fundedAccount.balance > 0 ? fundedAccount : source;
   }
   const funded = accounts.filter((account) => account.balance > 0);
   if (funded.length < minimum) {

@@ -81,9 +81,17 @@ for (const scenario of paymentAmounts) {
   test(`bill payment handles ${scenario.name}`, async ({ page, api, customer }) => {
     const source = await primaryAccount(api, customer.id);
     const beforeBalance = (await api.getAccount(source.id)).balance;
+    const paymentAmount = scenario.name === 'amount above the available balance'
+      ? amount(beforeBalance + 0.01)
+      : scenario.value;
     await signIn(page, customer);
     const billPay = new ParabankBillPayPage(page);
-    await billPay.submit(billDetails('Boundary Biller', scenario.value), source.id);
+    await billPay.submit(billDetails('Boundary Biller', paymentAmount), source.id);
+    if (scenario.value === '-1.00') {
+      test.fail(true, 'ParaBank currently accepts negative bill payment amounts');
+    } else if (scenario.name === 'amount above the available balance') {
+      test.fail(true, 'ParaBank currently permits bill payments that overdraw the source account');
+    }
     if (scenario.succeeds) {
       await billPay.expectConfirmation('Boundary Biller');
       expect((await api.getAccount(source.id)).balance).toBeCloseTo(beforeBalance - 0.01, 2);

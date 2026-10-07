@@ -1,5 +1,6 @@
 import { _android as android, test as base } from '@playwright/test';
 import { ParabankApi, type ParabankCustomer } from '../../src/support/parabank-api';
+import { isParaBankRateLimited } from '../../src/support/parabank-rate-limit';
 import { configureAndroidSdkPath } from '../../src/support/android-sdk';
 
 configureAndroidSdkPath();
@@ -8,8 +9,6 @@ type ParabankFixtures = {
   customer: ParabankCustomer;
   api: ParabankApi;
 };
-
-let seededCustomer: Promise<ParabankCustomer> | undefined;
 
 export const test = base.extend<ParabankFixtures>({
   page: async ({ page }, use, testInfo) => {
@@ -39,20 +38,21 @@ export const test = base.extend<ParabankFixtures>({
       }
     }
   },
-  api: async ({ request }, use) => {
+  api: async ({ request }, use, testInfo) => {
+    testInfo.skip(
+      isParaBankRateLimited(),
+      'ParaBank rate-limited an earlier request; skipping remaining tests to avoid repeated requests'
+    );
     await use(new ParabankApi(request));
   },
   customer: async ({ api }, use) => {
-    seededCustomer ??= (async () => {
-      const customer = await api.createCustomer();
-      const seedAccount = (await api.getAccounts(customer.id))[0];
-      if (!seedAccount) {
-        throw new Error(`ParaBank customer ${customer.id} was created without a seed account`);
-      }
-      await api.deposit(seedAccount.id, 10_000);
-      return customer;
-    })();
-    await use(await seededCustomer);
+    const customer = await api.createCustomer();
+    const seedAccount = (await api.getAccounts(customer.id))[0];
+    if (!seedAccount) {
+      throw new Error(`ParaBank customer ${customer.id} was created without a seed account`);
+    }
+    await api.deposit(seedAccount.id, 10_000);
+    await use(customer);
   }
 });
 

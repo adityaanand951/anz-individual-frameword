@@ -12,6 +12,10 @@ When('I sign in with username {string} and password {string}', async function (
   await this.loginPage.login(username, password);
 });
 
+When('I sign in with the valid user credentials', async function (this: MobileBddWorld) {
+  await this.loginPage.login();
+});
+
 Then('I should be on the dashboard', async function (this: MobileBddWorld) {
   await this.loginPage.expectDashboard();
 });

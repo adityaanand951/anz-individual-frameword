@@ -21,6 +21,11 @@ export class ParabankLoanPage {
     await expect(this.page.locator('#loanStatus')).toContainText(/denied/i);
   }
 
+  async expectRejected() {
+    await expect(this.page.locator('#loanStatus')).not.toContainText(/approved/i);
+    await expect(this.page.locator('#newAccountId')).toBeEmpty();
+  }
+
   async newAccountId() {
     return (await this.page.locator('#newAccountId').innerText()).trim();
   }

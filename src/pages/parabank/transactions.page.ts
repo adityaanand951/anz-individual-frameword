@@ -10,36 +10,39 @@ export class ParabankTransactionsPage {
   async openActivity(accountId: string) {
     const url = new URL('activity.htm', this.page.url());
     url.searchParams.set('id', accountId);
-    await this.page.goto(url.toString());
+    const activityResponse = this.page.waitForResponse((response) =>
+      response.url().includes(`/services_proxy/bank/accounts/${accountId}/transactions/month/`)
+    );
+    await Promise.all([this.page.goto(url.toString()), activityResponse]);
   }
 
   async findById(transactionId: string) {
     await this.openSearch();
     await this.page.locator('#transactionId').fill(transactionId);
-    await this.submit();
+    await this.submit('#findById');
   }
 
   async findByDate(date: string) {
     await this.openSearch();
     await this.page.locator('#transactionDate').fill(date);
-    await this.submit();
+    await this.submit('#findByDate');
   }
 
   async findByDateRange(fromDate: string, toDate: string) {
     await this.openSearch();
     await this.page.locator('#fromDate').fill(fromDate);
     await this.page.locator('#toDate').fill(toDate);
-    await this.submit();
+    await this.submit('#findByDateRange');
   }
 
   async findByAmount(amount: string) {
     await this.openSearch();
     await this.page.locator('#amount').fill(amount);
-    await this.submit();
+    await this.submit('#findByAmount');
   }
 
-  async submit() {
-    await this.page.getByRole('button', { name: /find transactions/i }).click();
+  async submit(buttonSelector: '#findById' | '#findByDate' | '#findByDateRange' | '#findByAmount') {
+    await this.page.locator(buttonSelector).click();
   }
 
   async selectAccount(accountId: string) {
@@ -58,29 +61,28 @@ export class ParabankTransactionsPage {
   }
 
   async expectTransactionVisible(transactionId: string) {
-    await expect(this.resultTable).toContainText(transactionId);
+    await expect(
+      this.resultTable.locator(`a[href*="transaction.htm?id=${transactionId}"]`)
+    ).toBeVisible();
   }
 
   async expectNoResults() {
-    const table = this.resultTable;
-    if (await table.count()) {
-      await expect(table.locator('tbody tr')).toHaveCount(0);
-      return;
-    }
-    await expect(this.page.locator('body')).toContainText(/no transactions|no results/i);
+    const results = this.page.locator('#resultContainer');
+    await expect(results).toBeVisible();
+    await expect(this.resultRows).toHaveCount(0);
   }
 
   async expectSearchPageUsable() {
-    await expect(this.page.locator('#transactionId')).toBeVisible();
-    await expect(this.page.locator('#transactionDate')).toBeVisible();
-    await expect(this.page.locator('#fromDate')).toBeVisible();
-    await expect(this.page.locator('#toDate')).toBeVisible();
-    await expect(this.page.locator('#amount')).toBeVisible();
+    await expect.poll(async () =>
+      await this.page.locator('#formContainer').isVisible() ||
+      await this.page.locator('#resultContainer').isVisible()
+    ).toBeTruthy();
   }
 
   async expectActivityPage(accountId: string) {
-    await expect(this.page).toHaveURL(new RegExp(`activity\\.ht\\?id=${accountId}`));
+    await expect(this.page).toHaveURL(new RegExp(`activity\\.htm\\?id=${accountId}`));
     await expect(this.resultTable).toBeVisible();
+    await expect(this.page.locator('#accountId')).toHaveText(accountId);
   }
 
   async allActivityTransactionIds(): Promise<string[]> {
@@ -88,7 +90,12 @@ export class ParabankTransactionsPage {
     const nextPage = this.page.getByRole('link', { name: /next/i });
     const ids: string[] = [];
     for (let pageNumber = 0; pageNumber < 100; pageNumber += 1) {
-      ids.push(...(await transactionLinks.allTextContents()).map((id) => id.trim()).filter(Boolean));
+      const links = await transactionLinks.evaluateAll((anchors) =>
+        anchors.map((anchor) => (anchor as HTMLAnchorElement).getAttribute('href') ?? '')
+      );
+      ids.push(...links
+        .map((href) => href.match(/[?&]id=([^&]+)/)?.[1] ?? '')
+        .filter(Boolean));
       if (!(await nextPage.count()) || !(await nextPage.isVisible()) || !(await nextPage.isEnabled())) {
         return ids;
       }

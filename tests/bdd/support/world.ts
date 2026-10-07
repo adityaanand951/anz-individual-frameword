@@ -24,6 +24,7 @@ export class BddWorld extends World {
   parabankDestinationAccountId!: string;
   parabankSourceBalanceBefore!: number;
   parabankDestinationBalanceBefore!: number;
+  parabankTransferAmount!: number;
 
   constructor(options: IWorldOptions) {
     super(options);

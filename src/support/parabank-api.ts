@@ -139,8 +139,9 @@ export class ParabankApi {
   async getAccounts(customerId: string): Promise<ParabankAccount[]> {
     const response = await this.request.get(`services/bank/customers/${customerId}/accounts`);
     await checkRateLimitResponse(response, 'account lookup');
-    expect(response.ok(), `ParaBank account lookup failed (${response.status()})`).toBeTruthy();
-    return parseAccounts(await response.text());
+    const body = await response.text();
+    expect(response.ok(), `ParaBank account lookup failed (${response.status()}): ${body}`).toBeTruthy();
+    return parseAccounts(body);
   }
 
   async getAccount(accountId: string): Promise<ParabankAccount> {

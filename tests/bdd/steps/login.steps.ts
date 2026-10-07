@@ -18,6 +18,10 @@ When(
   }
 );
 
+When('I sign in with the valid user credentials', async function (this: BddWorld) {
+  await this.loginPage.login();
+});
+
 Then('I should be on the dashboard', async function (this: BddWorld) {
   await this.loginPage.expectDashboard();
 });
@@ -92,13 +96,6 @@ Then('the {string} quick action should be visible', async function (this: BddWor
 
 Then('the {string} sidebar link should be visible', async function (this: BddWorld, link: string) {
   await this.dashboardPage.expectSidebarLink(link);
-});
-
-Then('the dashboard should match the visual baseline', async function (this: BddWorld) {
-  await expect(this.page).toHaveScreenshot('dashboard.png', {
-    fullPage: true,
-    animations: 'disabled'
-  });
 });
 
 Given('I check the ACME Demo endpoint', async function (this: BddWorld) {

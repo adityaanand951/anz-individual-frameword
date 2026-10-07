@@ -36,26 +36,6 @@ const apiOnlyCaseIds = new Set([
   'TC-ACC-015',
   'TC-TRF-018'
 ]);
-const androidDeviceUdids = Array.from(new Set(
-  (process.env.PARABANK_ANDROID_DEVICE_UDIDS ??
-    process.env.ANDROID_DEVICE_UDIDS ??
-    'emulator-5554,emulator-5556,emulator-5558')
-    .split(',')
-    .map((device) => device.trim())
-    .filter(Boolean)
-));
-const androidDeviceNames = (process.env.ANDROID_AVD_NAMES ??
-  'Pixel_10_Pro_Fold,Pixel_10_Pro,Pixel_6')
-  .split(',')
-  .map((name) => name.trim());
-const mobileViewportNames = [
-  'mobile-iphone-13',
-  'mobile-pixel-5',
-  'mobile-galaxy-s9',
-  'mobile-iphone-12',
-  'mobile-pixel-7'
-];
-
 const rows = tableLines.map((line) => {
   const values = line.slice(1, -1).split('|').map((value) => value.trim());
   if (values.length !== sourceColumnCount) {
@@ -63,30 +43,33 @@ const rows = tableLines.map((line) => {
   }
   return [
     ...values,
-    apiOnlyCaseIds.has(values[0])
+    (apiOnlyCaseIds.has(values[0]) || Number(values[6]) === 8)
       ? 'API only - run once'
-      : 'UI + API - desktop and mobile targets'
+      : Number(values[6]) === 9
+        ? 'Chromium, Firefox, and mobile 390x844'
+        : 'UI + API - desktop'
   ];
 });
 
-if (rows.length !== 77) {
-  throw new Error(`Expected 77 test case rows in ${sourcePath}; found ${rows.length}`);
+if (rows.length !== 144) {
+  throw new Error(`Expected 144 test case rows in ${sourcePath}; found ${rows.length}`);
 }
 
-const apiOnlyRows = rows.filter((row) => apiOnlyCaseIds.has(row[0]));
-if (apiOnlyRows.length !== apiOnlyCaseIds.size) {
-  throw new Error(`Expected ${apiOnlyCaseIds.size} API-only case rows; found ${apiOnlyRows.length}`);
+const apiOnlyRows = rows.filter((row) =>
+  apiOnlyCaseIds.has(row[0]) || Number(row[6]) === 8
+);
+if (apiOnlyRows.length !== apiOnlyCaseIds.size + 22) {
+  throw new Error(`Expected ${apiOnlyCaseIds.size + 22} API-only case rows; found ${apiOnlyRows.length}`);
 }
 
 const uiCaseCount = rows.length - apiOnlyRows.length;
-const totalProjectExecutions = rows.length + uiCaseCount * (
-  mobileViewportNames.length + androidDeviceUdids.length
-);
+const dayNineRows = rows.filter((row) => Number(row[6]) === 9).length;
+const totalProjectExecutions = rows.length + dayNineRows * 2;
 
 async function generate() {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'Automation Team';
-  workbook.subject = 'ParaBank Days 1-5 automated test case inventory';
+  workbook.subject = 'ParaBank Days 1-9 automated test case inventory';
   workbook.title = 'ParaBank Test Case Inventory';
   workbook.created = new Date();
   workbook.modified = new Date();
@@ -100,24 +83,22 @@ async function generate() {
     { header: 'Value', key: 'value', width: 26 }
   ];
   summary.addRows([
-    ['Scope', 'Days 1-5 (provided plan)'],
+    ['Scope', 'Days 1-9 (implemented cases)'],
     ['Unique test cases', rows.length],
     ['API-only cases (desktop project)', apiOnlyRows.length],
-    ['Cross-platform UI cases', uiCaseCount],
+    ['UI cases', uiCaseCount],
+    ['Day 9 cross-channel cases', dayNineRows],
     ['Total project executions', totalProjectExecutions],
-    ['Execution rule', 'API-only cases run once; UI cases run on every configured target.'],
+    ['Execution rule', 'Day 8 API cases run once; Day 9 cases run in Chromium, Firefox, and 390x844 mobile; all other UI cases run once on desktop.'],
     ['Public demo note', 'Full-suite execution was throttled (HTTP 429); use an approved isolated target.'],
     [],
     ['Executions by target', 'Cases'],
     ['desktop-chromium', rows.length],
-    ...mobileViewportNames.map((name) => [name, uiCaseCount]),
-    ...androidDeviceUdids.map((udid, index) => [
-      `android-${androidDeviceNames[index] || udid}`,
-      uiCaseCount
-    ]),
+    ['firefox (Day 9)', dayNineRows],
+    ['mobile-390x844 (Day 9)', dayNineRows],
     [],
     ['Cases by assigned day', 'Count'],
-    ...[1, 2, 3, 4, 5].map((day) => [
+    ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((day) => [
       `Day ${day}`,
       rows.filter((row) => Number(row[6]) === day).length
     ]),

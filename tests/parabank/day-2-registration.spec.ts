@@ -96,6 +96,8 @@ test('logout prevents browser-back access to the signed-in overview', async ({ p
   await login.expectAuthenticated();
   await page.getByRole('link', { name: 'Log Out' }).click();
   await page.goBack();
+  await page.reload();
+  await login.expectLoginPage();
   await expect(page.locator('#accountTable')).toBeHidden();
   await expect(page.getByRole('heading', { name: /accounts overview/i })).toBeHidden();
 });

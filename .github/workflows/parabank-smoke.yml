@@ -17,3 +17,30 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:parabank:smoke
+
+  payid-mock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:parabank:day-9:mock
+
+  cross-browser:
+    if: ${{ vars.PARABANK_BASE_URL != '' }}
+    runs-on: ubuntu-latest
+    env:
+      PARABANK_BASE_URL: ${{ vars.PARABANK_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox
+      - run: npm run test:parabank:day-9

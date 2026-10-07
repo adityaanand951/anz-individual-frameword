@@ -2,9 +2,9 @@
 
 The formatted Excel workbook is [parabank-test-inventory.xlsx](./parabank-test-inventory.xlsx). Regenerate it after editing this inventory with `npm run report:parabank:inventory`.
 
-The supplied plan covers Days 1-5. The automated suite contains 77 unique cases: Day 1 (8), Day 2 (18), Day 3 (15), Day 4 (18), and Day 5 (18).
+The automated inventory contains 144 unique cases across Days 1-9. Day 1-5 are the original supplied plan (77 cases); Days 6-9 add transaction search (15), lending (15), API (22), and cross-channel (15) coverage. Day 10 is a hardening day and adds no cases.
 
-Platform-aware counts keep unique scenarios separate from executions. Six API-only cases (TC-ACC-001, TC-ACC-012–015, and TC-TRF-018) run once in the desktop project. The other 71 cases include browser UI coverage (with API setup/reconciliation where applicable) and run on desktop, five mobile viewport profiles, and each configured Android device. With the three default Android device entries, that is 77 + (71 × 5) + (71 × 3) = 645 project executions, not 645 unique cases. Use `npm run test:parabank:matrix` to run the expanded matrix; it requires connected Android devices and is best run against an approved isolated ParaBank instance.
+Platform-aware counts keep unique scenarios separate from executions. The six API-only cases from Days 1-5, all 22 Day 8 API cases, and three high-volume Day 6 cases run once. Day 9's 15 channel cases run in Chromium, Firefox, and a 390×844 mobile viewport; other UI cases run once in desktop Chromium. This results in 174 project executions (144 unique scenarios plus two additional Day 9 project executions per case).
 
 All cases below have automation code. "Day Completed" is left as Pending because execution of the full suite has not been completed; the public demo returned HTTP 429 during the full run. See Notes for the observed public-demo limitations. A test marked expected failure checks a validation gap in the public demo and should become an unexpected pass if the behavior is fixed.
 
@@ -87,3 +87,70 @@ All cases below have automation code. "Day Completed" is left as Pending because
 | TC-BPY-016 | Bill Pay | Reject bill payment exceeding the available balance. | Negative | High | Medium | 5 | Pending | Automated | Not fully verified | Y | N | - |  |
 | TC-BPY-017 | Bill Pay | Pay the same biller twice and verify two separate debits. | Functional | High | Medium | 5 | Pending | Automated | Not fully verified | Y | N | - |  |
 | TC-BPY-018 | Bill Pay | Pay ten billers from JSON data and reconcile total debits and transactions. | E2E | High | High | 5 | Pending | Automated | Not fully verified | Y | N | - | Multi-step flagship journey |
+| TC-TXN-001 | Transactions | Find a transaction by transaction ID. | Positive | High | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-002 | Transactions | Find transactions by transaction date. | Positive | High | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-003 | Transactions | Find transactions within an inclusive date range. | Positive | High | Medium | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-004 | Transactions | Find a transaction by exact amount. | Positive | High | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-005 | Transactions | Handle a date range whose start and end dates are equal. | Boundary | Medium | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-006 | Transactions | Handle a date range whose end date is earlier than its start date. | Negative | High | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-007 | Transactions | Handle an invalid date format in a date-range search. | Negative | High | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-008 | Transactions | Handle a future date in a date-range search. | Boundary | Medium | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-009 | Transactions | Show an empty state when amount search has no matching transaction. | Negative | Medium | Low | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-010 | Transactions | Seed 55 transactions and find the newest transaction through UI search. | Volume | High | High | 6 | Pending | Automated | Not fully verified | Y | N | - | API-only high-volume setup |
+| TC-TXN-011 | Transactions | Show the seeded transaction volume in account activity without losing rows. | Volume | High | High | 6 | Pending | Automated | Not fully verified | Y | N | - | API-only high-volume setup |
+| TC-TXN-012 | Transactions | List the newest seeded transaction first in high-volume account activity. | Volume | High | High | 6 | Pending | Automated | Not fully verified | Y | N | - | API-only high-volume setup |
+| TC-TXN-013 | Transactions | Reconcile account activity against the API for funded account 1. | Reconciliation | High | Medium | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-014 | Transactions | Reconcile account activity against the API for funded account 2. | Reconciliation | High | Medium | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-TXN-015 | Transactions | Reconcile account activity against the API for funded account 3. | Reconciliation | High | Medium | 6 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-001 | Lending | Approve a valid loan and show the new loan account in overview. | Positive | High | High | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-002 | Lending | Deny a loan when down payment exceeds available source funds. | Negative | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-003 | Lending | Handle a loan application with zero loan amount. | Boundary | High | Low | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-004 | Lending | Handle a loan application with negative loan amount. | Negative | High | Low | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-005 | Lending | Handle a loan application with blank down payment. | Negative | High | Low | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-006 | Lending | Handle a loan application with non-numeric down payment. | Negative | High | Low | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-007 | Lending | Handle a down payment equal to the loan amount. | Boundary | Medium | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-008 | Lending | Check loan approval-matrix combination 1. | Decision matrix | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-009 | Lending | Check loan approval-matrix combination 2. | Decision matrix | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-010 | Lending | Check loan approval-matrix combination 3. | Decision matrix | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-011 | Lending | Check loan approval-matrix combination 4. | Decision matrix | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-012 | Lending | Check loan approval-matrix combination 5. | Decision matrix | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-013 | Lending | Transfer funds out of an approved loan account. | Functional | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-014 | Lending | Show the approved loan account in Accounts Overview. | Functional | High | Medium | 7 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-LND-015 | Lending | Register, fund savings, obtain an approved loan, pay a bill, and reconcile the complete ledger. | E2E | High | High | 7 | Pending | Automated | Not fully verified | Y | N | - | Flagship journey |
+| TC-API-001 | API | Create and retrieve a customer through the REST customer resource. | Positive | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-002 | API | Retrieve the registered customer's seed-account collection. | Positive | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-003 | API | Open a checking account through the REST API. | Positive | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-004 | API | Open a savings account through the REST API. | Positive | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-005 | API | Retrieve account details through the REST API. | Positive | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-006 | API | Deposit funds and find the resulting transaction. | Positive | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-007 | API | Retrieve transaction identifiers and amounts. | Positive | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-008 | API | Transfer funds and verify source debit and destination credit. | Positive | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-009 | API | Pay a bill and verify the debit and recorded transaction. | Positive | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-010 | API | Return no customer record for an unknown customer ID. | Negative | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-011 | API | Return no account record for an unknown account ID. | Negative | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-012 | API | Return no transaction record for an unknown account ID. | Negative | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-013 | API | Reject a transfer with missing required parameters. | Negative | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-014 | API | Reject a bill payment with missing required parameters. | Negative | High | Low | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-015 | API | Reject JSON transfer content without mutating either account balance. | Negative | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-016 | API | Validate required customer fields in the REST XML response. | Contract | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-017 | API | Validate account fields and balance in the REST XML response. | Contract | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-018 | API | Validate transaction fields in the REST XML response. | Contract | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-019 | API | Match SOAP customer lookup with the REST customer record. | Parity | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-020 | API | Match SOAP account lookup with the REST account record. | Parity | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-021 | API | Verify SOAP transaction lookup returns REST transaction identifiers. | Parity | High | Medium | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only |
+| TC-API-022 | API | Create customer, account, transfer, bill payment, and reconcile ledger using only APIs. | E2E | High | High | 8 | Pending | Automated | Not fully verified | Y | N | - | API-only flagship |
+| TC-CHN-001 | Channels | Log in successfully in Chromium. | Cross-browser | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-002 | Channels | Display Accounts Overview in Chromium. | Cross-browser | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-003 | Channels | Transfer between own accounts in Chromium. | Cross-browser | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-004 | Channels | Pay a bill in Chromium. | Cross-browser | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-005 | Channels | Hide authenticated account links after logout in Chromium. | Cross-browser | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-006 | Channels | Keep keyboard focus in the expected order on the login form. | Accessibility | Medium | Low | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-007 | Channels | Keep login form controls inside a 390×844 mobile viewport. | Responsive | Medium | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-008 | Channels | Expose account and balance headings in the overview table. | Accessibility | Medium | Low | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-009 | Channels | Show every required payee field in the bill-pay form. | Functional | Medium | Low | 9 | Pending | Automated | Not fully verified | Y | N | - |  |
+| TC-CHN-010 | Accessibility | Scan login page and assert no critical axe violations. | Accessibility | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - | Violations attached to result |
+| TC-CHN-011 | Accessibility | Scan overview page and assert no critical axe violations. | Accessibility | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - | Violations attached to result |
+| TC-CHN-012 | Accessibility | Scan transfer page and assert no critical axe violations. | Accessibility | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - | Violations attached to result |
+| TC-CHN-013 | PayID Simulation | Handle a mocked settled PayID/NPP payment response. | Integration | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - | Mock simulation; no native ParaBank PayID |
+| TC-CHN-014 | PayID Simulation | Handle a mocked failed PayID/NPP payment response. | Integration | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - | Mock simulation; no native ParaBank PayID |
+| TC-CHN-015 | PayID Simulation | Handle a mocked timeout PayID/NPP payment response. | Integration | High | Medium | 9 | Pending | Automated | Not fully verified | Y | N | - | Mock simulation; no native ParaBank PayID |
